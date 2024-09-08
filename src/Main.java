@@ -3,40 +3,55 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        multTable();
+        multTable();;;;;;;;;;;;;;;;;;
+    }
+
+    static String centerString(String str, int len) {
+        int diff = len - str.length();
+        int left = diff / 2;
+        int right = (diff + 1) / 2;
+        return len > str.length() ? " ".repeat(left) + str + " ".repeat(right) : str;
     }
 
     public static void ATMProblem() {
         final int[] notes = { 10_000, 1_000, 100, 50 };
         System.out.println("Enter amount: ");
         Scanner scanner = new Scanner(System.in);
-        if (scanner.hasNextInt()) {
-            int amount = scanner.nextInt();
+        if (!scanner.hasNextInt()) {
+            System.out.println("Please enter valid number");
             scanner.close();
-
-            int[] result = new int[notes.length];
-            int rem = 0;
-            Arrays.fill(result, 0);
-
-            int notesIndex = 0;
-
-            while (true) {
-                if (amount / notes[notesIndex] > 0) {
-                    result[notesIndex] += 1;
-                    amount -= notes[notesIndex];
-                } else {
-                    notesIndex++;
-                }
-                if (notesIndex >= notes.length) {
-                    rem = amount % notes[notesIndex - 1];
-                    break;
-                }
-            }
-            for (int i = 0; i < result.length; i++) {
-                System.out.println("note[" + notes[i] + "] = " + result[i]);
-            }
-            System.out.println("Remainder = " + rem);
+            return;
         }
+
+        int amount = scanner.nextInt();
+        scanner.close();
+
+        if (amount < 0 || amount < notes[notes.length - 1]) {
+            System.out.println("Can't retrieve sum");
+            return;
+        }
+
+        int[] result = new int[notes.length];
+        int rem = 0;
+        Arrays.fill(result, 0);
+
+        int notesIndex = 0;
+        while (true) {
+            int times = amount / notes[notesIndex];
+            if (times > 0) {
+                result[notesIndex] += times;
+                amount -= notes[notesIndex] * times;
+            }
+            notesIndex++;
+            if (notesIndex >= notes.length) {
+                rem = amount % notes[notesIndex - 1];
+                break;
+            }
+        }
+        for (int i = 0; i < result.length; i++) {
+            System.out.println("note[" + notes[i] + "] = " + result[i]);
+        }
+        System.out.println("Remainder = " + rem);
     }
 
     static boolean isLuckyTicket(int number) {
@@ -61,32 +76,39 @@ public class Main {
         final int MIN_TICKET_VALUE = 0;
         System.out.println("Enter start number: ");
         Scanner scanner = new Scanner(System.in);
-        if (scanner.hasNextInt()) {
-            int start = scanner.nextInt();
-            System.out.println("Enter end number: ");
-            if (scanner.hasNextInt()) {
-                int end = scanner.nextInt();
-                scanner.close();
-                int luckyTickets = 0;
+        if (!scanner.hasNextInt()) {
+            System.out.println("Please enter valid integer");
+            scanner.close();
+            return;
+        }
+        int start = scanner.nextInt();
+        System.out.println("Enter end number: ");
+        if (!scanner.hasNextInt()) {
+            System.out.println("Please enter valid integer");
+            scanner.close();
+            return;
+        }
 
-                if (start > MAX_TICKET_VALUE || end > MAX_TICKET_VALUE || start < MIN_TICKET_VALUE
-                        || end < MIN_TICKET_VALUE) {
-                    System.out.println("Invalid input");
-                    return;
-                }
+        int end = scanner.nextInt();
+        scanner.close();
+        int luckyTickets = 0;
 
-                if (start < end) {
-                    for (int i = start; i <= end; i++) {
-                        luckyTickets += isLuckyTicket(i) ? 1 : 0;
-                    }
-                } else {
-                    for (int i = start; i >= end; i--) {
-                        luckyTickets += isLuckyTicket(i) ? 1 : 0;
-                    }
-                }
-                System.out.println(luckyTickets);
+        if (start > MAX_TICKET_VALUE || end > MAX_TICKET_VALUE || start < MIN_TICKET_VALUE
+                || end < MIN_TICKET_VALUE) {
+            System.out.println("Invalid input");
+            return;
+        }
+
+        if (start < end) {
+            for (int i = start; i <= end; i++) {
+                luckyTickets += isLuckyTicket(i) ? 1 : 0;
+            }
+        } else {
+            for (int i = start; i >= end; i--) {
+                luckyTickets += isLuckyTicket(i) ? 1 : 0;
             }
         }
+        System.out.println(luckyTickets);
     }
 
     public static void multTable() {
@@ -98,18 +120,19 @@ public class Main {
 
             final int maxLen = String.format("%d", number * number).length() + 1;
             final String FORMAT_STRING = String.format("|%%%dd", maxLen);
-            for (int i = 0; i < number + 1; i++) {
+            System.out.printf(FORMAT_STRING, 0);
+            for (int i = 1; i <= number; i++) {
                 System.out.printf(FORMAT_STRING, i);
                 if (i == number) {
                     System.out.print("|");
                 }
             }
             System.out.println();
-            for (int i = 0; i < number; i++) {
-                System.out.printf(FORMAT_STRING, i + 1);
-                for (int j = 0; j < number; j++) {
-                    System.out.printf(FORMAT_STRING, (j + 2) * (i + 1));
-                    if (j == number - 1) {
+            for (int i = 1; i <= number; i++) {
+                System.out.printf(FORMAT_STRING, i);
+                for (int j = 1; j <= number; j++) {
+                    System.out.printf(FORMAT_STRING, j * i);
+                    if (j == number) {
                         System.out.print("|");
                     }
                 }
