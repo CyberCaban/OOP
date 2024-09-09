@@ -2,32 +2,7 @@ package labs;
 
 import java.util.*;
 
-enum Suit {
-    CLUBS,
-    DIAMONDS,
-    HEARTS,
-    SPADES
-}
-
-enum Rank {
-    TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE
-}
-
-class Card {
-    Suit suit;
-    Rank rank;
-
-    Card(Suit suit, Rank rank) {
-        this.suit = suit;
-        this.rank = rank;
-    }
-
-    public String toString() {
-        return String.format("%-5s of %-8s", rank, suit);
-    }
-}
-
-class Deck {
+public class Deck {
     List<Card> cards = new ArrayList<>();
 
     Deck() {
@@ -56,7 +31,7 @@ class Deck {
 
     public void prettyPrint() {
         for (int i = 0; i < cards.size(); i++) {
-            System.out.printf("%-5s, ",cards.get(i).toString());
+            System.out.printf("%-5s, ", cards.get(i).toString());
             if ((i + 1) % 5 == 0) {
                 System.out.println();
             }
