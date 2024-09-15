@@ -1,4 +1,4 @@
-package labs;
+package labs.lab2;
 
 enum Suit {
     CLUBS,
