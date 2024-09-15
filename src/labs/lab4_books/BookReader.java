@@ -70,12 +70,13 @@ public class BookReader {
         }
     }
 
-    public boolean isLate(Book book, int day, int month) {
-        if (book.getMonth() > month || book.getMonth() == month && book.getDay() > day) {
+    public boolean isLate(Book book, Day handoverDay, Month handoverMonth) {
+        if (Day.isGreaterThan(book.getDay(), handoverDay) || Month.isGreaterThan(book.getMonth(), handoverMonth)) {
             return true;
         } else {
             return false;
         }
+
     }
 
     @Override

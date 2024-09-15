@@ -3,14 +3,14 @@ package labs.lab4_books;
 public class Book {
     private String title;
     private String author;
-    private int day;
-    private int month;
+    private Day day;
+    private Month month;
 
     public Book() {
         this.title = "";
         this.author = "";
-        this.day = 0;
-        this.month = 0;
+        this.day = Day.ONE;
+        this.month = Month.JANUARY;
     }
 
     /**
@@ -22,12 +22,13 @@ public class Book {
      * @param day
      * @param month
      */
-    public Book(String title, String author, int day, int month) {
-        if (day < 0 || day > 31 || month < 0 || month > 12) {
+    public Book(String title, String author, Day day, Month month) {
+        if (Day.isLessThan(day, Day.ONE) || Day.isGreaterThan(day, Day.THIRTY_ONE)
+                || Month.isLessThan(month, Month.JANUARY) || Month.isGreaterThan(month, Month.DECEMBER)) {
             this.title = "";
             this.author = "";
-            this.day = 0;
-            this.month = 0;
+            this.day = Day.ONE;
+            this.month = Month.JANUARY;
             return;
         }
         this.title = title;
@@ -40,8 +41,8 @@ public class Book {
         if (book == null) {
             this.title = "";
             this.author = "";
-            this.day = 0;
-            this.month = 0;
+            this.day = Day.ONE;
+            this.month = Month.JANUARY;
             return;
         }
         this.title = book.title;
@@ -66,31 +67,33 @@ public class Book {
         this.author = author;
     }
 
-    public int getDay() {
+    public Day getDay() {
         return day;
     }
 
-    public void setDay(int day) {
-        if (day < 0 || day > 31) {
-            this.day = 1;
+    public void setDay(Day day) {
+        if (day == null) {
+            this.day = Day.ONE;
             return;
-        } else if (month == 2 && day > 28) {
-            this.day = 1;
+        } else if (Month.isEqual(this.month, Month.FEBRUARY) && day.getValue() > 28) {
+            this.day = Day.ONE;
             return;
-        } else if (month == 4 || month == 6 || month == 9 || month == 11 && day > 30) {
-            this.day = 1;
+        } else if ((Month.isEqual(this.month, Month.APRIL) || Month.isEqual(this.month, Month.JUNE)
+                || Month.isEqual(this.month, Month.SEPTEMBER) || Month.isEqual(this.month, Month.NOVEMBER))
+                && Day.isGreaterThan(day, Day.TWENTY_EIGHT)) {
+            this.day = Day.ONE;
             return;
         }
         this.day = day;
     }
 
-    public int getMonth() {
+    public Month getMonth() {
         return month;
     }
 
-    public void setMonth(int month) {
-        if (month < 0 || month > 12) {
-            this.month = 1;
+    public void setMonth(Month month) {
+        if (month == null) {
+            this.month = Month.JANUARY;
             return;
         }
         this.month = month;
