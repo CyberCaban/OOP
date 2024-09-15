@@ -2,7 +2,6 @@ package labs.lab2;
 
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.*;
 
 public class LabArrays {
     public static void task1() {

@@ -23,14 +23,6 @@ public class Book {
      * @param month
      */
     public Book(String title, String author, Day day, Month month) {
-        if (Day.isLessThan(day, Day.ONE) || Day.isGreaterThan(day, Day.THIRTY_ONE)
-                || Month.isLessThan(month, Month.JANUARY) || Month.isGreaterThan(month, Month.DECEMBER)) {
-            this.title = "";
-            this.author = "";
-            this.day = Day.ONE;
-            this.month = Month.JANUARY;
-            return;
-        }
         this.title = title;
         this.author = author;
         this.day = day;
@@ -93,6 +85,14 @@ public class Book {
 
     public void setMonth(Month month) {
         if (month == null) {
+            this.month = Month.JANUARY;
+            return;
+        } else if (Month.isEqual(this.month, Month.FEBRUARY) && day.getValue() > 28) {
+            this.month = Month.JANUARY;
+            return;
+        } else if ((Month.isEqual(this.month, Month.APRIL) || Month.isEqual(this.month, Month.JUNE)
+                || Month.isEqual(this.month, Month.SEPTEMBER) || Month.isEqual(this.month, Month.NOVEMBER))
+                && Day.isGreaterThan(day, Day.TWENTY_NINE)) {
             this.month = Month.JANUARY;
             return;
         }
