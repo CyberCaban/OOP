@@ -6,9 +6,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Indie {
     public static void main() {
@@ -24,7 +23,7 @@ public class Indie {
             }
             reader.close();
         } catch (Exception e) {
-            System.out.println(e);
+            System.err.println(e);
             return;
         }
 
@@ -34,22 +33,27 @@ public class Indie {
             String[] line = rawData.get(i).split(csvRegex, -1);
             String name = line[0].trim();
             String region = line[1].trim();
-            int population = Integer.parseInt(line[2]);
-            double area = parseDoubleLocale(line[3]);
-            double coastlinePerc = parseDoubleLocale(line[4]);
-            double gdp = parseDoubleLocale(line[5]);
-            double literacyPerc = parseDoubleLocale(line[6]);
-            double birth = parseDoubleLocale(line[7]);
-            double death = parseDoubleLocale(line[8]);
-            double agriculturePerc = parseDoubleLocale(line[9]);
-            double industryPerc = parseDoubleLocale(line[10]);
-            double servicePerc = parseDoubleLocale(line[11]);
-
-            countries[i] = new CountryData(name, region, population, area, coastlinePerc, gdp, literacyPerc, birth,
-                    death, agriculturePerc, industryPerc, servicePerc);
+            try {
+                int population = Integer.parseInt(line[2]);
+                double area = parseDoubleLocale(line[3]);
+                double coastlinePerc = parseDoubleLocale(line[4]);
+                double gdp = parseDoubleLocale(line[5]);
+                double literacyPerc = parseDoubleLocale(line[6]);
+                double birth = parseDoubleLocale(line[7]);
+                double death = parseDoubleLocale(line[8]);
+                double agriculturePerc = parseDoubleLocale(line[9]);
+                double industryPerc = parseDoubleLocale(line[10]);
+                double servicePerc = parseDoubleLocale(line[11]);
+                countries[i] = new CountryData(name, region, population, area, coastlinePerc, gdp, literacyPerc, birth,
+                        death, agriculturePerc, industryPerc, servicePerc);
+            } catch (NumberFormatException e) {
+                System.err.println("Failed to parse line " + i + ": " + line);
+                return;
+            }
         }
 
-        HashMap<String, ArrayList<CountryData>> countriesByRegion = new HashMap<>();
+        // region: country[]
+        final HashMap<String, ArrayList<CountryData>> countriesByRegion = new HashMap<>();
         for (CountryData country : countries) {
             if (!countriesByRegion.containsKey(country.getRegion())) {
                 countriesByRegion.put(country.getRegion(), new ArrayList<>());
@@ -57,27 +61,212 @@ public class Indie {
             countriesByRegion.get(country.getRegion()).add(country);
         }
 
+        PartsOfTheWorld pow = new PartsOfTheWorld(countriesByRegion);
+        pow.printCountries();
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nEnter country name: ");
+        while (true) {
+            if (!scanner.hasNextLine()) {
+                System.out.println("Invalid input");
+                continue;
+            }
+            break;
+        }
+        String country = scanner.nextLine();
+        pow.printCountryData(country);
+
+        CountryData.printSortingParams();
+        System.out.println("Enter parameter: ");
+        String temp;
+        while (true) {
+            temp = scanner.nextLine();
+            if (!scanner.hasNextLine() || !CountryData.getSortingParams().contains(temp)) {
+                System.out.println("Invalid input");
+                continue;
+            }
+            break;
+        }
+        String param = temp;
+        scanner.close();
+
         BufferedWriter wr;
+        for (String worldPart : pow.getPartsOfTheWorld().keySet()) {
+            try {
+                wr = new BufferedWriter(new FileWriter("./src/labs/indie_1/output/world_data_" + worldPart + ".csv"));
+            } catch (IOException e) {
+                System.err.println("Failed to create output file for region " + worldPart);
+                continue;
+            }
+            String res = CountryData.getSortingParams() + "\n";
+            ArrayList<CountryData> countriesToSort = new ArrayList<>();
+            for (String region : pow.getPartsOfTheWorld().get(worldPart).keySet()) {
+                countriesToSort.addAll(pow.getPartsOfTheWorld().get(worldPart).get(region));
+            }
+            
+            switch (param) {
+                case "Name":
+                    countriesToSort.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+                    break;
+
+                case "Region":
+                    countriesToSort.sort((o1, o2) -> o1.getRegion().compareTo(o2.getRegion()));
+                    break;
+
+                case "Population":
+                    countriesToSort.sort((o1, o2) -> {
+                        int population1 = o1.getPopulation();
+                        int population2 = o2.getPopulation();
+                        return Integer.compare(population1, population2);
+                    });
+                    break;
+
+                case "Area":
+                    countriesToSort.sort((o1, o2) -> {
+                        double area1 = o1.getArea();
+                        double area2 = o2.getArea();
+                        return Double.compare(area1, area2);
+                    });
+                    break;
+
+                case "CoastlinePerc":
+                    countriesToSort.sort((o1, o2) -> {
+                        double coastlinePerc1 = o1.getCoastlinePerc();
+                        double coastlinePerc2 = o2.getCoastlinePerc();
+                        return Double.compare(coastlinePerc1, coastlinePerc2);
+                    });
+                    break;
+
+                case "GDP":
+                    countriesToSort.sort((o1, o2) -> {
+                        double gdp1 = o1.getGdp();
+                        double gdp2 = o2.getGdp();
+                        return gdp1 > gdp2 ? 1 : -1;
+                    });
+                    break;
+
+                case "LiteracyPerc":
+                    countriesToSort.sort((o1, o2) -> {
+                        double literacyPerc1 = o1.getLiteracyPerc();
+                        double literacyPerc2 = o2.getLiteracyPerc();
+                        return Double.compare(literacyPerc1, literacyPerc2);
+                    });
+                    break;
+
+                case "Birth Rate":
+                    countriesToSort.sort((o1, o2) -> o1.getBirth() > o2.getBirth() ? 1 : -1);
+                    break;
+
+                case "Death Rate":
+                    countriesToSort.sort((o1, o2) -> o1.getDeath() > o2.getDeath() ? 1 : -1);
+                    break;
+
+                case "Agriculture":
+                    countriesToSort.sort((o1, o2) -> o1.getAgriculturePerc() > o2.getAgriculturePerc() ? 1 : -1);
+                    break;
+
+                case "Industry":
+                    countriesToSort.sort((o1, o2) -> o1.getIndustryPerc() > o2.getIndustryPerc() ? 1 : -1);
+                    break;
+
+                case "Service":
+                    countriesToSort.sort((o1, o2) -> o1.getServicePerc() > o2.getServicePerc() ? 1 : -1);
+                    break;
+
+                case "PopulationDensity":
+                    countriesToSort.sort((o1, o2) -> {
+                        double populationDensity1 = o1.calcPopulationDensity();
+                        double populationDensity2 = o2.calcPopulationDensity();
+                        return Double.compare(populationDensity1, populationDensity2);
+                    });
+                    break;
+
+                case "CoastlineLength":
+                    countriesToSort.sort((o1, o2) -> {
+                        double coastlineLength1 = o1.calcCoastlineLength();
+                        double coastlineLength2 = o2.calcCoastlineLength();
+                        return Double.compare(coastlineLength1, coastlineLength2);
+                    });
+                    break;
+
+                case "AbsGDPCurrency":
+                    countriesToSort
+                            .sort((o1, o2) -> o1.calcAbsGDPCurrency(1.0) > o2.calcAbsGDPCurrency(1.0) ? 1 : -1);
+                    break;
+
+                case "UneducatedPeople":
+                    countriesToSort.sort((o1, o2) -> {
+                        double uneducatedPeople1 = o1.calcUneducatedPeople();
+                        double uneducatedPeople2 = o2.calcUneducatedPeople();
+                        return Double.compare(uneducatedPeople1, uneducatedPeople2);
+                    });
+                    break;
+
+                case "MostIncomeActivitySector":
+                    countriesToSort.sort((o1, o2) -> o1.calcMostIncomeActivitySector()
+                            .compareTo(o2.calcMostIncomeActivitySector()));
+                    break;
+
+                default:
+                    break;
+            }
+
+            for (CountryData sortedCountry : countriesToSort) {
+                res += String.format(
+                        "%s,%d,%s,\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%d\",\"%.2f\",\"%.2f\",\"%.2f\",%s\n",
+                        sortedCountry.getName(),
+                        sortedCountry.getPopulation(),
+                        sortedCountry.getRegion(),
+                        sortedCountry.getArea(),
+                        sortedCountry.getCoastlinePerc(),
+                        sortedCountry.getGdp(),
+                        sortedCountry.getLiteracyPerc(),
+                        sortedCountry.getBirth(),
+                        sortedCountry.getDeath(),
+                        sortedCountry.getAgriculturePerc(),
+                        sortedCountry.getIndustryPerc(),
+                        sortedCountry.getServicePerc(),
+                        sortedCountry.calcPopulationDensity(),
+                        sortedCountry.calcCoastlineLength(),
+                        sortedCountry.calcAbsGDPCurrency(1.0),
+                        sortedCountry.calcUneducatedPeople(),
+                        sortedCountry.calcMostIncomeActivitySector());
+            }
+
+            try {
+                wr.write(res);
+                wr.close();
+            } catch (IOException e) {
+                System.err.println("Failed to write to output file");
+                continue;
+            }
+        }
+
         for (String region : countriesByRegion.keySet()) {
             try {
-                wr = new BufferedWriter(new FileWriter("./src/labs/indie_1/output/data_countries_" + region + ".csv"));
-                String header = String.format("%s,%s,%s,%s,%s,%s,%s", "Name", "Population Density", "Coastline",
-                        "GDP", "GDP Currency", "Uneducated People", "Most Income Activity Sector");
-                wr.append(header + "\n");
-                for (CountryData country : countriesByRegion.get(region)) {
-                    double coastline = country.calcCoastlineLength();
-                    String line = coastline == 0 ? "" : String.format("\"%.2f\"", coastline);
-                    String tmp = String.format("%s,%d,%s,\"%.2f\",\"%.2f\",\"%.2f\",%s",
-                            country.getName(), country.calcPopulationDensity(),
-                            line, country.calcAbsGDP(),
-                            country.calcAbsGDPCurrency(0.39), country.calcUneducatedPeople(),
-                            country.calcMostIncomeActivitySector());
-                    wr.append(tmp + "\n");
-                }
+                wr = new BufferedWriter(new FileWriter("./src/labs/indie_1/output/region_data_" + region + ".csv"));
+            } catch (IOException e) {
+                System.err.println("Failed to create output file for region " + region);
+                continue;
+            }
+            String result = String.format("%s,%s,%s,%s,%s,%s,%s\n", "Name", "Population",
+                    "Density", "Coastline",
+                    "GDP", "GDP Currency", "Uneducated People", "Most Income Activity Sector");
+            for (CountryData cntry : countriesByRegion.get(region)) {
+                double coastline = cntry.calcCoastlineLength();
+                String line = coastline == 0 ? "" : String.format("\"%.2f\"", coastline);
+                String tmp = String.format("%s,%d,%s,\"%.2f\",\"%.2f\",\"%.2f\",%s\n",
+                        cntry.getName(), cntry.calcPopulationDensity(),
+                        line, cntry.calcAbsGDP(),
+                        cntry.calcAbsGDPCurrency(0.39), cntry.calcUneducatedPeople(),
+                        cntry.calcMostIncomeActivitySector());
+                result += tmp;
+            }
+            try {
+                wr.write(result);
                 wr.close();
-            } catch (Exception e) {
-                System.out.println(e);
-                return;
+            } catch (IOException e) {
+                System.err.println("Failed to write to output file for region " + region);
+                continue;
             }
         }
     }
@@ -101,7 +290,7 @@ public class Indie {
  * численность населения,
  * площадь в квадратных милях, береговая линия (отношение длины береговой линии
  * к площади),
- * ВВП на душу населения в долларах, грамотность в процентах, уровень
+ * ВВП на душу населения в долларахграмотность в процентах, уровень
  * рождаемости на 1000 чело-
  * век, уровень смертности на 1000 человек, доля сельского хозяйства в ВВП, доля
  * промышленности

@@ -109,4 +109,19 @@ public class CountryData {
         return servicePerc;
     }
 
+    public String toString() {
+        return String.format(
+                "Name: %s, Region: %s, Population: %d, Area: %.2f, CoastlinePerc: %.2f, Gdp: %.2f, LiteracyPerc: %.2f, Birth: %.2f, Death: %.2f, AgriculturePerc: %.2f, IndustryPerc: %.2f, ServicePerc: %.2f",
+                name, region, population, area, coastlinePerc, gdp, literacyPerc, birth, death, agriculturePerc,
+                industryPerc, servicePerc);
+    }
+
+    public static void printSortingParams() {
+        System.out.println(
+                "Available sorting params: Name, Region, Population, Area, CoastlinePerc, GDP, LiteracyPerc, Birth, Death, AgriculturePerc, IndustryPerc, ServicePerc, PopulationDensity, CoastlineLength, AbsGDP, AbsGDPCurrency, UneducatedPeople, MostIncomeActivitySector");
+    }
+
+    public static String getSortingParams() {
+        return "Name, Region, Population, Area, CoastlinePerc, GDP, LiteracyPerc, Birth, Death, AgriculturePerc, IndustryPerc, ServicePerc, PopulationDensity, CoastlineLength, AbsGDP, AbsGDPCurrency, UneducatedPeople, MostIncomeActivitySector";
+    }
 }
