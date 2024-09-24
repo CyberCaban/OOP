@@ -59,8 +59,9 @@ public class PartsOfTheWorld {
             }
             this.partsOfTheWorld.get(regionName).put(region, countriesByRegion.get(region));
             // this.partsOfTheWorld.put(regionName, new HashMap<>());
-            // this.partsOfTheWorld.get(regionName).put(region, countriesByRegion.get(region));
-            
+            // this.partsOfTheWorld.get(regionName).put(region,
+            // countriesByRegion.get(region));
+
         }
 
         this.countries = new ArrayList<>();
@@ -95,6 +96,16 @@ public class PartsOfTheWorld {
 
     public ArrayList<CountryData> getCountries() {
         return countries;
+    }
+
+    public boolean countriesContain(String name) {
+        for (CountryData c : countries) {
+            String n = c.getName();
+            if (n.equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public HashMap<String, HashMap<String, ArrayList<CountryData>>> getPartsOfTheWorld() {

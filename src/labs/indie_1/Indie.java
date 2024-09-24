@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class Indie {
@@ -15,7 +16,6 @@ public class Indie {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader("./src/labs/indie_1/input/data_countries_world.csv"));
-            reader.readLine();
             String line = reader.readLine();
 
             while ((line = reader.readLine()) != null) {
@@ -28,30 +28,33 @@ public class Indie {
         }
 
         final String csvRegex = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
-        final CountryData[] countries = new CountryData[rawData.size()];
+        final ArrayList<CountryData> countries = new ArrayList<>(rawData.size());
         for (int i = 0; i < rawData.size(); i++) {
-            String[] line = rawData.get(i).split(csvRegex, -1);
-            String name = line[0].trim();
-            String region = line[1].trim();
+            List<String> line = new ArrayList<>(List.of(rawData.get(i).split(csvRegex, -1)));
             try {
-                int population = Integer.parseInt(line[2]);
-                double area = parseDoubleLocale(line[3]);
-                double coastlinePerc = parseDoubleLocale(line[4]);
-                double gdp = parseDoubleLocale(line[5]);
-                double literacyPerc = parseDoubleLocale(line[6]);
-                double birth = parseDoubleLocale(line[7]);
-                double death = parseDoubleLocale(line[8]);
-                double agriculturePerc = parseDoubleLocale(line[9]);
-                double industryPerc = parseDoubleLocale(line[10]);
-                double servicePerc = parseDoubleLocale(line[11]);
-                countries[i] = new CountryData(name, region, population, area, coastlinePerc, gdp, literacyPerc, birth,
+                String name = line.get(0).trim().replaceAll("\"", "");
+                String region = line.get(1).trim().replaceAll("\"", "");
+                int population = Integer.parseInt(line.get(2));
+                double area = parseDoubleLocale(line.get(3));
+                double coastlinePerc = parseDoubleLocale(line.get(4));
+                double gdp = parseDoubleLocale(line.get(5));
+                double literacyPerc = parseDoubleLocale(line.get(6));
+                double birth = parseDoubleLocale(line.get(7));
+                double death = parseDoubleLocale(line.get(8));
+                double agriculturePerc = parseDoubleLocale(line.get(9));
+                double industryPerc = parseDoubleLocale(line.get(10));
+                double servicePerc = parseDoubleLocale(line.get(11));
+                CountryData c = new CountryData(name, region, population, area, coastlinePerc, gdp, literacyPerc, birth,
                         death, agriculturePerc, industryPerc, servicePerc);
+                countries.add(c);
             } catch (NumberFormatException e) {
+                System.err.println("Failed to parse line because of NumberFormatException " + i + ": " + line);
+                continue;
+            } catch (IndexOutOfBoundsException e) {
                 System.err.println("Failed to parse line " + i + ": " + line);
-                return;
+                continue;
             }
         }
-
         // region: country[]
         final HashMap<String, ArrayList<CountryData>> countriesByRegion = new HashMap<>();
         for (CountryData country : countries) {
@@ -65,23 +68,24 @@ public class Indie {
         pow.printCountries();
         Scanner scanner = new Scanner(System.in);
         System.out.println("\nEnter country name: ");
+        String countryName = scanner.nextLine();
         while (true) {
-            if (!scanner.hasNextLine()) {
+            if (!pow.countriesContain(countryName.trim())) {
                 System.out.println("Invalid input");
+                countryName = scanner.nextLine();
                 continue;
             }
             break;
         }
-        String country = scanner.nextLine();
-        pow.printCountryData(country);
+        pow.printCountryData(countryName.trim());
 
         CountryData.printSortingParams();
         System.out.println("Enter parameter: ");
-        String temp;
+        String temp = scanner.nextLine();
         while (true) {
-            temp = scanner.nextLine();
-            if (!scanner.hasNextLine() || !CountryData.getSortingParams().contains(temp)) {
+            if (!CountryData.isSortingParam(temp)) {
                 System.out.println("Invalid input");
+                temp = scanner.nextLine();
                 continue;
             }
             break;
@@ -97,12 +101,12 @@ public class Indie {
                 System.err.println("Failed to create output file for region " + worldPart);
                 continue;
             }
-            String res = CountryData.getSortingParams() + "\n";
+            StringBuilder res = new StringBuilder(CountryData.getSortingParams() + "\n");
             ArrayList<CountryData> countriesToSort = new ArrayList<>();
             for (String region : pow.getPartsOfTheWorld().get(worldPart).keySet()) {
                 countriesToSort.addAll(pow.getPartsOfTheWorld().get(worldPart).get(region));
             }
-            
+
             switch (param) {
                 case "Name":
                     countriesToSort.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
@@ -211,7 +215,7 @@ public class Indie {
             }
 
             for (CountryData sortedCountry : countriesToSort) {
-                res += String.format(
+                res.append(String.format(
                         "%s,%d,%s,\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%.2f\",\"%d\",\"%.2f\",\"%.2f\",\"%.2f\",%s\n",
                         sortedCountry.getName(),
                         sortedCountry.getPopulation(),
@@ -229,11 +233,11 @@ public class Indie {
                         sortedCountry.calcCoastlineLength(),
                         sortedCountry.calcAbsGDPCurrency(1.0),
                         sortedCountry.calcUneducatedPeople(),
-                        sortedCountry.calcMostIncomeActivitySector());
+                        sortedCountry.calcMostIncomeActivitySector()));
             }
 
             try {
-                wr.write(res);
+                wr.write(res.toString());
                 wr.close();
             } catch (IOException e) {
                 System.err.println("Failed to write to output file");
@@ -248,9 +252,9 @@ public class Indie {
                 System.err.println("Failed to create output file for region " + region);
                 continue;
             }
-            String result = String.format("%s,%s,%s,%s,%s,%s,%s\n", "Name", "Population",
+            StringBuilder result = new StringBuilder(String.format("%s,%s,%s,%s,%s,%s,%s,%s\n", "Name", "Population",
                     "Density", "Coastline",
-                    "GDP", "GDP Currency", "Uneducated People", "Most Income Activity Sector");
+                    "GDP", "GDP Currency", "Uneducated People", "Most Income Activity Sector"));
             for (CountryData cntry : countriesByRegion.get(region)) {
                 double coastline = cntry.calcCoastlineLength();
                 String line = coastline == 0 ? "" : String.format("\"%.2f\"", coastline);
@@ -259,10 +263,10 @@ public class Indie {
                         line, cntry.calcAbsGDP(),
                         cntry.calcAbsGDPCurrency(0.39), cntry.calcUneducatedPeople(),
                         cntry.calcMostIncomeActivitySector());
-                result += tmp;
+                result.append(tmp);
             }
             try {
-                wr.write(result);
+                wr.write(result.toString());
                 wr.close();
             } catch (IOException e) {
                 System.err.println("Failed to write to output file for region " + region);
@@ -272,7 +276,7 @@ public class Indie {
     }
 
     static double parseDoubleLocale(String s) {
-        if (s.length() == 0) {
+        if (s.isEmpty()) {
             return 0;
         }
         return Double.parseDouble(s.replace("\"", "").replace(",", "."));
@@ -295,13 +299,13 @@ public class Indie {
  * век, уровень смертности на 1000 человек, доля сельского хозяйства в ВВП, доля
  * промышленности
  * в ВВП, доля сферы обслуживания в ВВП.
- * 
+ * <p>
  * Выведите в отдельный файл для каждого региона список стран, упорядоченный по
  * площади,
  * с названиями и результатами работы, перечисленных выше методов. Если страна
  * не граничит с
  * морем или океаном, то длину береговой линии не выводите.
- * 
+ * <p>
  * Дополнительно создайте класс или классы для хранения информации о частях
  * света: европе,
  * азии, африке, америке, австралии. Каждая часть света, должна содержать список

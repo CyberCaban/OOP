@@ -124,4 +124,14 @@ public class CountryData {
     public static String getSortingParams() {
         return "Name, Region, Population, Area, CoastlinePerc, GDP, LiteracyPerc, Birth, Death, AgriculturePerc, IndustryPerc, ServicePerc, PopulationDensity, CoastlineLength, AbsGDP, AbsGDPCurrency, UneducatedPeople, MostIncomeActivitySector";
     }
+
+    public static boolean isSortingParam(String param) {
+        String[] params = getSortingParams().split(", ");
+        for (String p : params) {
+            if (p.trim().equals(param.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
