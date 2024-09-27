@@ -5,27 +5,25 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Indie {
+    static void readFile(ArrayList<String> buf, String filename) {
+        try (BufferedReader br = new BufferedReader(
+                new FileReader(filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                buf.add(line);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading file");
+            System.exit(1);
+        }
+    }
+
     public static void main() {
         ArrayList<String> rawData = new ArrayList<>();
-        BufferedReader reader;
-        try {
-            reader = new BufferedReader(new FileReader("./src/labs/indie_1/input/data_countries_world.csv"));
-            String line = reader.readLine();
-
-            while ((line = reader.readLine()) != null) {
-                rawData.add(line);
-            }
-            reader.close();
-        } catch (Exception e) {
-            System.err.println(e);
-            return;
-        }
+        readFile(rawData, "./src/labs/indie_1/input/data_countries_world.csv");
 
         final String csvRegex = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
         final ArrayList<CountryData> countries = new ArrayList<>(rawData.size());
@@ -107,111 +105,81 @@ public class Indie {
                 countriesToSort.addAll(pow.getPartsOfTheWorld().get(worldPart).get(region));
             }
 
+            Comparator<CountryData> comparator = null;
             switch (param) {
                 case "Name":
-                    countriesToSort.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+                    comparator = Comparator.comparing(CountryData::getName);
                     break;
 
                 case "Region":
-                    countriesToSort.sort((o1, o2) -> o1.getRegion().compareTo(o2.getRegion()));
+                    comparator = Comparator.comparing(CountryData::getRegion);
                     break;
 
                 case "Population":
-                    countriesToSort.sort((o1, o2) -> {
-                        int population1 = o1.getPopulation();
-                        int population2 = o2.getPopulation();
-                        return Integer.compare(population1, population2);
-                    });
+                    comparator = Comparator.comparingInt(CountryData::getPopulation);
                     break;
 
                 case "Area":
-                    countriesToSort.sort((o1, o2) -> {
-                        double area1 = o1.getArea();
-                        double area2 = o2.getArea();
-                        return Double.compare(area1, area2);
-                    });
+                    comparator = Comparator.comparingDouble(CountryData::getArea);
                     break;
 
                 case "CoastlinePerc":
-                    countriesToSort.sort((o1, o2) -> {
-                        double coastlinePerc1 = o1.getCoastlinePerc();
-                        double coastlinePerc2 = o2.getCoastlinePerc();
-                        return Double.compare(coastlinePerc1, coastlinePerc2);
-                    });
+                    comparator = Comparator.comparingDouble(CountryData::getCoastlinePerc);
                     break;
 
                 case "GDP":
-                    countriesToSort.sort((o1, o2) -> {
-                        double gdp1 = o1.getGdp();
-                        double gdp2 = o2.getGdp();
-                        return gdp1 > gdp2 ? 1 : -1;
-                    });
+                    comparator = Comparator.comparingDouble(CountryData::getGdp);
                     break;
 
                 case "LiteracyPerc":
-                    countriesToSort.sort((o1, o2) -> {
-                        double literacyPerc1 = o1.getLiteracyPerc();
-                        double literacyPerc2 = o2.getLiteracyPerc();
-                        return Double.compare(literacyPerc1, literacyPerc2);
-                    });
+                    comparator = Comparator.comparingDouble(CountryData::getLiteracyPerc);
                     break;
 
                 case "Birth Rate":
-                    countriesToSort.sort((o1, o2) -> o1.getBirth() > o2.getBirth() ? 1 : -1);
+                    comparator = Comparator.comparingDouble(CountryData::getBirth);
                     break;
 
                 case "Death Rate":
-                    countriesToSort.sort((o1, o2) -> o1.getDeath() > o2.getDeath() ? 1 : -1);
+                    comparator = Comparator.comparingDouble(CountryData::getDeath);
                     break;
 
                 case "Agriculture":
-                    countriesToSort.sort((o1, o2) -> o1.getAgriculturePerc() > o2.getAgriculturePerc() ? 1 : -1);
+                    comparator = Comparator.comparingDouble(CountryData::getAgriculturePerc);
                     break;
 
                 case "Industry":
-                    countriesToSort.sort((o1, o2) -> o1.getIndustryPerc() > o2.getIndustryPerc() ? 1 : -1);
+                    comparator = Comparator.comparingDouble(CountryData::getIndustryPerc);
                     break;
 
                 case "Service":
-                    countriesToSort.sort((o1, o2) -> o1.getServicePerc() > o2.getServicePerc() ? 1 : -1);
+                    comparator = Comparator.comparingDouble(CountryData::getServicePerc);
                     break;
 
                 case "PopulationDensity":
-                    countriesToSort.sort((o1, o2) -> {
-                        double populationDensity1 = o1.calcPopulationDensity();
-                        double populationDensity2 = o2.calcPopulationDensity();
-                        return Double.compare(populationDensity1, populationDensity2);
-                    });
+                    comparator = Comparator.comparingDouble(CountryData::calcPopulationDensity);
                     break;
 
                 case "CoastlineLength":
-                    countriesToSort.sort((o1, o2) -> {
-                        double coastlineLength1 = o1.calcCoastlineLength();
-                        double coastlineLength2 = o2.calcCoastlineLength();
-                        return Double.compare(coastlineLength1, coastlineLength2);
-                    });
+                    comparator = Comparator.comparingDouble(CountryData::calcCoastlineLength);
                     break;
 
                 case "AbsGDPCurrency":
-                    countriesToSort
-                            .sort((o1, o2) -> o1.calcAbsGDPCurrency(1.0) > o2.calcAbsGDPCurrency(1.0) ? 1 : -1);
+                    comparator = Comparator.comparingDouble(o -> o.calcAbsGDPCurrency(1.0));
                     break;
 
                 case "UneducatedPeople":
-                    countriesToSort.sort((o1, o2) -> {
-                        double uneducatedPeople1 = o1.calcUneducatedPeople();
-                        double uneducatedPeople2 = o2.calcUneducatedPeople();
-                        return Double.compare(uneducatedPeople1, uneducatedPeople2);
-                    });
+                    comparator = Comparator.comparingDouble(CountryData::calcUneducatedPeople);
                     break;
 
                 case "MostIncomeActivitySector":
-                    countriesToSort.sort((o1, o2) -> o1.calcMostIncomeActivitySector()
-                            .compareTo(o2.calcMostIncomeActivitySector()));
+                    comparator = Comparator.comparing(CountryData::calcMostIncomeActivitySector);
                     break;
 
                 default:
                     break;
+            }
+            if (comparator != null) {
+                countriesToSort.sort(comparator);
             }
 
             for (CountryData sortedCountry : countriesToSort) {
