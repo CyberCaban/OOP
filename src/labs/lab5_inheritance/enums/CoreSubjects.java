@@ -1,4 +1,4 @@
-package labs.lab5_inheritance;
+package labs.lab5_inheritance.enums;
 
 public enum CoreSubjects {
     MATH, RUSSIAN, HISTORY, ENGLISH;

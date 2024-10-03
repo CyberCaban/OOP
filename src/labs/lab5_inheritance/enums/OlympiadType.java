@@ -1,4 +1,4 @@
-package labs.lab5_inheritance;
+package labs.lab5_inheritance.enums;
 
 public enum OlympiadType {
     SCHOOL(1), CITY(2), REGION(3);

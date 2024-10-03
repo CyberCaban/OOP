@@ -1,6 +1,9 @@
 package labs.lab5_inheritance;
 
-abstract public class Student {
+import labs.lab5_inheritance.enums.Gender;
+import labs.lab5_inheritance.shared.IStudent;
+
+abstract public class Student implements IStudent, Comparable<Student> {
     String name;
     int age;
     Gender gender;
@@ -48,4 +51,9 @@ abstract public class Student {
     }
 
     public abstract boolean isScolarshipEligible();
+
+    @Override
+    public int compareTo(Student o) {
+        return name.compareTo(o.name);
+    }
 }

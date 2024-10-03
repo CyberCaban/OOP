@@ -1,5 +1,7 @@
 package labs.lab5_inheritance;
 
+import labs.lab5_inheritance.enums.OlympiadType;
+
 public class OlympiadAward {
 
     private OlympiadType type;
