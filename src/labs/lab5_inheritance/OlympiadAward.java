@@ -9,6 +9,9 @@ public class OlympiadAward {
     private int place;
 
     public OlympiadAward(OlympiadType type, String name, int place) {
+        if (place <= 0) {
+            throw new IllegalArgumentException("Place must be positive");
+        }
         this.type = type;
         this.name = name;
         this.place = place;
@@ -43,3 +46,4 @@ public class OlympiadAward {
                 '}';
     }
 }
+

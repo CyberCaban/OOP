@@ -3,6 +3,7 @@ package labs.lab5_inheritance;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Comparator;
+import java.util.Arrays;
 
 import labs.lab5_inheritance.enums.CoreSubjects;
 import labs.lab5_inheritance.enums.Gender;
@@ -33,10 +34,10 @@ interface ISchoolboy extends IStudent {
 }
 
 public class Schoolboy extends Student implements ISchoolboy {
-    HashMap<CoreSubjects, Integer> grades;
-    ArrayList<Integer> otherGrades;
-    ArrayList<OlympiadAward> awards;
-    int schoolId;
+    private HashMap<CoreSubjects, Integer> grades;
+    private ArrayList<Integer> otherGrades;
+    private ArrayList<OlympiadAward> awards;
+    private int schoolId;
 
     public Schoolboy(String name, int age, Gender genger, int schoolId) {
         super(name, age, genger);
@@ -50,10 +51,10 @@ public class Schoolboy extends Student implements ISchoolboy {
             HashMap<CoreSubjects, Integer> grades,
             ArrayList<Integer> otherGrades, ArrayList<OlympiadAward> awards) {
         super(name, age, genger);
-        this.schoolId = schoolId;
-        this.grades = grades;
-        this.otherGrades = otherGrades;
-        this.awards = awards;
+        setSchoolId(schoolId);
+        setGrades(grades);
+        setOtherGrades(otherGrades);
+        setAwards(awards);
     }
 
     public HashMap<CoreSubjects, Integer> getGrades() {
@@ -65,22 +66,77 @@ public class Schoolboy extends Student implements ISchoolboy {
     }
 
     public void setGrades(HashMap<CoreSubjects, Integer> grades) {
+        if (grades == null) {
+            throw new NullPointerException("Grades cannot be null");
+        }
+        if (grades.isEmpty()) {
+            throw new IllegalArgumentException("Grades cannot be empty");
+        }
+        if (!grades.keySet()
+                .containsAll(Arrays.asList(CoreSubjects.values()))) {
+            throw new IllegalArgumentException(
+                    "Grades must contain all core subjects");
+        }
+        for (int grade : grades.values()) {
+            if (grade < MIN_GRADE || grade > MAX_GRADE) {
+                throw new IllegalArgumentException(
+                        "Grades must be in the range [" + MIN_GRADE + ", "
+                                + MAX_GRADE + "]");
+            }
+        }
         this.grades = grades;
     }
 
     public void setOtherGrades(ArrayList<Integer> otherGrades) {
+        if (otherGrades == null) {
+            throw new NullPointerException("OtherGrades cannot be null");
+        }
+        if (otherGrades.isEmpty()) {
+            throw new IllegalArgumentException("OtherGrades cannot be empty");
+        }
+        for (int grade : otherGrades) {
+            if (grade < MIN_GRADE || grade > MAX_GRADE) {
+                throw new IllegalArgumentException(
+                        "Grades must be in the range [" + MIN_GRADE + ", "
+                                + MAX_GRADE + "]");
+            }
+        }
         this.otherGrades = otherGrades;
     }
 
+    public void setAwards(ArrayList<OlympiadAward> awards) {
+        if (awards == null) {
+            throw new NullPointerException("Awards cannot be null");
+        }
+        if (awards.isEmpty()) {
+            throw new IllegalArgumentException("Awards cannot be empty");
+        }
+        this.awards = awards;
+    }
+
     public void addGrade(CoreSubjects subject, int grade) {
+        if (subject == null) {
+            throw new NullPointerException("Subject cannot be null");
+        }
+        if (grade < MIN_GRADE || grade > MAX_GRADE) {
+            throw new IllegalArgumentException("Grades must be in the range ["
+                    + MIN_GRADE + ", " + MAX_GRADE + "]");
+        }
         grades.put(subject, grade);
     }
 
     public void addOtherGrade(int grade) {
+        if (grade < MIN_GRADE || grade > MAX_GRADE) {
+            throw new IllegalArgumentException("Grades must be in the range ["
+                    + MIN_GRADE + ", " + MAX_GRADE + "]");
+        }
         otherGrades.add(grade);
     }
 
     public void addAward(OlympiadAward award) {
+        if (award == null) {
+            throw new NullPointerException("Award cannot be null");
+        }
         awards.add(award);
     }
 
@@ -93,6 +149,9 @@ public class Schoolboy extends Student implements ISchoolboy {
     }
 
     public void setSchoolId(int schoolId) {
+        if (schoolId < 0) {
+            throw new IllegalArgumentException("SchoolId cannot be negative");
+        }
         this.schoolId = schoolId;
     }
 
@@ -116,10 +175,8 @@ public class Schoolboy extends Student implements ISchoolboy {
         final int MIN_CORE_GRADE = 5;
         final int MIN_OTHER_GRADE = 4;
         boolean isGoodGrades = true;
-        if (!grades.keySet().contains(CoreSubjects.MATH)
-                || !grades.keySet().contains(CoreSubjects.RUSSIAN)
-                || !grades.keySet().contains(CoreSubjects.HISTORY)
-                || !grades.keySet().contains(CoreSubjects.ENGLISH)) {
+        if (!grades.keySet()
+                .containsAll(Arrays.asList(CoreSubjects.values()))) {
             isGoodGrades = false;
         }
         for (CoreSubjects subject : grades.keySet()) {
@@ -134,7 +191,6 @@ public class Schoolboy extends Student implements ISchoolboy {
                 break;
             }
         }
-
         boolean isAwarded = false;
         for (OlympiadAward award : awards) {
             if ((award.getType() == OlympiadType.REGION

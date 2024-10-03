@@ -1,14 +1,17 @@
 package labs.lab5_inheritance;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+
 import labs.lab5_inheritance.enums.Gender;
 import labs.lab5_inheritance.shared.IStudent;
 
 interface IUndergrad extends IStudent {
-    ArrayList<Integer> getGrades();
+    List<Integer> getGrades();
 
-    ArrayList<Integer> getCourseGrades();
+    List<Integer> getCourseGrades();
 
     void setGrades(ArrayList<Integer> grades);
 
@@ -24,8 +27,8 @@ interface IUndergrad extends IStudent {
 }
 
 public class Undergrad extends Student implements IUndergrad {
-    ArrayList<Integer> grades;
-    ArrayList<Integer> courseGrades;
+    private ArrayList<Integer> grades;
+    private ArrayList<Integer> courseGrades;
 
     public Undergrad(String name, int age, Gender genger) {
         super(name, age, genger);
@@ -36,31 +39,59 @@ public class Undergrad extends Student implements IUndergrad {
     public Undergrad(String name, int age, Gender genger,
             ArrayList<Integer> grades, ArrayList<Integer> courseGrades) {
         super(name, age, genger);
-        this.grades = grades;
-        this.courseGrades = courseGrades;
+        setGrades(grades);
+        setCourseGrades(courseGrades);
     }
 
-    public ArrayList<Integer> getGrades() {
-        return grades;
+    public List<Integer> getGrades() {
+        return Collections.unmodifiableList(grades);
     }
 
-    public ArrayList<Integer> getCourseGrades() {
-        return courseGrades;
+    public List<Integer> getCourseGrades() {
+        return Collections.unmodifiableList(courseGrades);
     }
 
     public void setGrades(ArrayList<Integer> grades) {
+        if (grades == null) {
+            throw new NullPointerException("Grades cannot be null");
+        }
+        for (int grade : grades) {
+            if (grade < MIN_GRADE || grade > MAX_GRADE) {
+                throw new IllegalArgumentException(
+                        "Grades must be in the range [" + MIN_GRADE + ", "
+                                + MAX_GRADE + "]");
+            }
+        }
         this.grades = grades;
     }
 
     public void setCourseGrades(ArrayList<Integer> courseGrades) {
+        if (courseGrades == null) {
+            throw new NullPointerException("CourseGrades cannot be null");
+        }
+        for (int grade : courseGrades) {
+            if (grade < MIN_GRADE || grade > MAX_GRADE) {
+                throw new IllegalArgumentException(
+                        "Grades must be in the range [" + MIN_GRADE + ", "
+                                + MAX_GRADE + "]");
+            }
+        }
         this.courseGrades = courseGrades;
     }
 
     public void addGrade(int grade) {
+        if (grade < MIN_GRADE || grade > MAX_GRADE) {
+            throw new IllegalArgumentException("Grades must be in the range ["
+                    + MIN_GRADE + ", " + MAX_GRADE + "]");
+        }
         grades.add(grade);
     }
 
     public void addCourseGrade(int grade) {
+        if (grade < MIN_GRADE || grade > MAX_GRADE) {
+            throw new IllegalArgumentException("Grades must be in the range ["
+                    + MIN_GRADE + ", " + MAX_GRADE + "]");
+        }
         courseGrades.add(grade);
     }
 
