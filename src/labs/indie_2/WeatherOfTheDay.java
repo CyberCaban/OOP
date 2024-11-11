@@ -71,3 +71,10 @@ public class WeatherOfTheDay {
     }
 
 }
+
+class WeatherOfTheDayComparator implements java.util.Comparator<WeatherOfTheDay> {
+    @Override
+    public int compare(WeatherOfTheDay w1, WeatherOfTheDay w2) {
+        return w1.getDate().compareTo(w2.getDate());
+    }
+}
